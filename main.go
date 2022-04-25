@@ -9,8 +9,9 @@ import (
 func main() {
 	db := config.InitDB()
 
-	InDB := controllers.UserRepo{DB: db}
+	userRepo := controllers.UserRepo{DB: db}
+	photoRepo := controllers.PhotoRepo{DB: db}
 
-	r := routers.StartApp(InDB)
+	r := routers.StartApp(userRepo, photoRepo)
 	r.Run(":8080")
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func StartApp(c controllers.UserRepo) *gin.Engine {
+func StartApp(c controllers.UserRepo, p controllers.PhotoRepo) *gin.Engine {
 	r := gin.Default()
 
 	userRouter := r.Group("/users")
@@ -17,6 +17,13 @@ func StartApp(c controllers.UserRepo) *gin.Engine {
 		userRouter.POST("/login", c.UserLogin)
 		userRouter.PUT("/:id", middlewares.Authentication(), c.UserUpdate)
 		userRouter.DELETE("/", middlewares.Authentication(), c.UserDelete)
+	}
+
+	photoRouter := r.Group("/photos")
+	{
+		photoRouter.Use(middlewares.Authentication())
+		photoRouter.GET("/", p.GetPhoto)
+		photoRouter.POST("/", p.UploadPhoto)
 	}
 	return r
 }
