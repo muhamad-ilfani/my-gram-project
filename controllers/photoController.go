@@ -4,6 +4,7 @@ import (
 	"my-gram/helpers"
 	"my-gram/models"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -18,9 +19,9 @@ type PhotoRepo struct {
 func (p *PhotoRepo) GetPhoto(c *gin.Context) {
 	Photos := []models.Photo{}
 
-	if err := p.DB.Debug().Preload("Comments").Find(&Photos).Error; err != nil {
+	if err := p.DB.Debug().Preload("Comments").Preload("User").Find(&Photos).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "data not found",
+			"error":   "photo not found",
 			"message": err.Error(),
 		})
 		return
@@ -63,5 +64,75 @@ func (p *PhotoRepo) UploadPhoto(c *gin.Context) {
 		"photo_url":  Photo.Photo_url,
 		"user_id":    Photo.User_id,
 		"created_at": Photo.Created_at,
+	})
+}
+
+func (p *PhotoRepo) UpdatePhoto(c *gin.Context) {
+	GetId, _ := strconv.Atoi(c.Param("photoId"))
+
+	userData := c.MustGet("userData").(jwt.MapClaims)
+	userId := userData["id"]
+
+	contextType := helpers.GetContentType(c)
+	Photo := models.Photo{}
+	OldPhoto := models.Photo{}
+
+	if contextType == "application/json" {
+		c.ShouldBindJSON(&Photo)
+	} else {
+		c.ShouldBind(&Photo)
+	}
+
+	Photo.Updated_at = time.Now()
+	Photo.User_id = uint(userId.(float64))
+
+	if err := p.DB.Debug().First(&OldPhoto, GetId).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "photo not found",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := p.DB.Debug().Model(&OldPhoto).Updates(&Photo).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "failed to update photo",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":         OldPhoto.Id,
+		"title":      OldPhoto.Title,
+		"caption":    OldPhoto.Caption,
+		"photo_url":  OldPhoto.Photo_url,
+		"user_id":    OldPhoto.User_id,
+		"updated_at": OldPhoto.Updated_at,
+	})
+
+}
+
+func (p *PhotoRepo) DeletePhoto(c *gin.Context) {
+	GetId, _ := strconv.Atoi(c.Param("photoId"))
+	Photo := models.Photo{}
+
+	if err := p.DB.Debug().First(&Photo, GetId).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "photo not found",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := p.DB.Debug().Delete(&Photo).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "failed to delete photo",
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "your photo has been succesfully deleted",
 	})
 }

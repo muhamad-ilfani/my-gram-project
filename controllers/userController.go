@@ -101,7 +101,7 @@ func (u *UserRepo) UserLogin(c *gin.Context) {
 }
 
 func (u *UserRepo) UserUpdate(c *gin.Context) {
-	GetId, _ := strconv.Atoi(c.Param("id"))
+	GetId, _ := strconv.Atoi(c.Param("userId"))
 	UserData := c.MustGet("userData").(jwt.MapClaims)
 	UserId := UserData["id"].(float64)
 

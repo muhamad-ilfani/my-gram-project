@@ -10,21 +10,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Authorization() gin.HandlerFunc {
+func PhotoAuthorization() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		db := config.InitDB()
-		getId, err := strconv.Atoi(c.Param("id"))
+		getId, err := strconv.Atoi(c.Param("photoId"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error":   "bad request",
 				"message": "invalid parameter",
 			})
+			return
 		}
 		UserData := c.MustGet("userData").(jwt.MapClaims)
 		UserId := UserData["id"].(float64)
-		User := models.User{}
+		Photo := models.Photo{}
 
-		if err := db.Preload("Photos").Preload("Comments").Preload("Medias").Where("id=?", getId).Take(&User).Error; err != nil {
+		if err := db.Preload("User").Preload("Comments").First(&Photo, getId).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error":   "data not found",
 				"message": err.Error(),
@@ -32,7 +33,7 @@ func Authorization() gin.HandlerFunc {
 			return
 		}
 
-		if int(UserId) != User.Id {
+		if int(UserId) != Photo.User.Id {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error":   "unauthorized",
 				"message": "you can't access this data",

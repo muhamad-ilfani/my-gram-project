@@ -16,6 +16,7 @@ func Authentication() gin.HandlerFunc {
 				"error":   "Unauthenticated",
 				"message": err.Error(),
 			})
+			return
 		}
 		c.Set("userData", verifyToken)
 		c.Next()

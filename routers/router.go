@@ -15,7 +15,7 @@ func StartApp(c controllers.UserRepo, p controllers.PhotoRepo) *gin.Engine {
 		userRouter.GET("/", c.GetAllUser)
 		userRouter.POST("/register", c.UserRegister)
 		userRouter.POST("/login", c.UserLogin)
-		userRouter.PUT("/:id", middlewares.Authentication(), c.UserUpdate)
+		userRouter.PUT("/:userId", middlewares.Authentication(), c.UserUpdate)
 		userRouter.DELETE("/", middlewares.Authentication(), c.UserDelete)
 	}
 
@@ -24,6 +24,8 @@ func StartApp(c controllers.UserRepo, p controllers.PhotoRepo) *gin.Engine {
 		photoRouter.Use(middlewares.Authentication())
 		photoRouter.GET("/", p.GetPhoto)
 		photoRouter.POST("/", p.UploadPhoto)
+		photoRouter.PUT("/:photoId", middlewares.PhotoAuthorization(), p.UpdatePhoto)
+		photoRouter.DELETE("/:photoId", middlewares.PhotoAuthorization(), p.DeletePhoto)
 	}
 	return r
 }
