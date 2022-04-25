@@ -120,14 +120,14 @@ func (u *UserRepo) UserUpdate(c *gin.Context) {
 	User.Updated_at = time.Now()
 	User.Id = int(UserId)
 
-	if err := u.DB.Preload("Photos").Preload("Comments").Preload("Medias").Where("id=?", GetId).Take(&OldUser).Error; err != nil {
+	if err := u.DB.Where("id=?", GetId).Take(&OldUser).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "data not found",
 			"message": err.Error(),
 		})
 		return
 	}
-	if err := u.DB.Model(&OldUser).Updates(&User).Error; err != nil {
+	if err := u.DB.Preload("Photos").Preload("Comments").Preload("Medias").Model(&OldUser).Updates(&User).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "failed to update data",
 			"message": err.Error(),
@@ -148,14 +148,14 @@ func (u *UserRepo) UserDelete(c *gin.Context) {
 	UserId := int(UserData["id"].(float64))
 	User := models.User{}
 
-	if err := u.DB.Preload("Photos").Preload("Comments").Preload("Medias").Where("id=?", UserId).Find(&User).Error; err != nil {
+	if err := u.DB.First(&User, UserId).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "data not found",
 			"message": err.Error(),
 		})
 		return
 	}
-	if err := u.DB.Delete(&User).Error; err != nil {
+	if err := u.DB.Preload("Photos").Preload("Comments").Preload("Medias").Model(&User).Delete(&User).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "failed to delete data",
 			"message": err.Error(),
