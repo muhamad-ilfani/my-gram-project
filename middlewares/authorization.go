@@ -33,7 +33,7 @@ func PhotoAuthorization() gin.HandlerFunc {
 			return
 		}
 
-		if int(UserId) != Photo.User.Id {
+		if uint(UserId) != Photo.User_id {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error":   "unauthorized",
 				"message": "you can't access this data",
@@ -67,7 +67,41 @@ func CommentAuthorization() gin.HandlerFunc {
 			return
 		}
 
-		if int(UserId) != Comment.User.Id {
+		if uint(UserId) != Comment.User_id {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error":   "unauthorized",
+				"message": "you can't access this data",
+			})
+			return
+		}
+		c.Next()
+	}
+}
+
+func MediaAuthorization() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		db := config.InitDB()
+		getId, err := strconv.Atoi(c.Param("socialMediaId"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error":   "bad request",
+				"message": "invalid parameter",
+			})
+			return
+		}
+		UserData := c.MustGet("userData").(jwt.MapClaims)
+		UserId := UserData["id"].(float64)
+		Media := models.Media{}
+
+		if err := db.Preload("User").First(&Media, getId).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error":   "data not found",
+				"message": err.Error(),
+			})
+			return
+		}
+
+		if int(UserId) != int(Media.User_id) {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error":   "unauthorized",
 				"message": "you can't access this data",

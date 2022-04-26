@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func StartApp(c controllers.UserRepo, p controllers.PhotoRepo, o controllers.CommentRepo) *gin.Engine {
+func StartApp(c controllers.UserRepo, p controllers.PhotoRepo, o controllers.CommentRepo, m controllers.MediaRepo) *gin.Engine {
 	r := gin.Default()
 
 	userRouter := r.Group("/users")
@@ -35,6 +35,15 @@ func StartApp(c controllers.UserRepo, p controllers.PhotoRepo, o controllers.Com
 		commentRouter.POST("/", o.UploadComment)
 		commentRouter.PUT("/:commentId", middlewares.CommentAuthorization(), o.UpdateComment)
 		commentRouter.DELETE("/:commentId", middlewares.CommentAuthorization(), o.DeleteComment)
+	}
+
+	mediaRouter := r.Group("/socialmedias")
+	{
+		mediaRouter.Use(middlewares.Authentication())
+		mediaRouter.GET("/", m.GetMedia)
+		mediaRouter.POST("/", m.UploadMedia)
+		mediaRouter.PUT("/:socialMediaId", middlewares.MediaAuthorization(), m.UpdateMedia)
+		mediaRouter.DELETE("/:socialMediaId", middlewares.MediaAuthorization(), m.DeleteMedia)
 	}
 
 	return r

@@ -63,7 +63,11 @@ func (o *CommentRepo) UploadComment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"data": Comment,
+		"id":         Comment.Id,
+		"message":    Comment.Message,
+		"photo_id":   Comment.Photo_id,
+		"user_id":    Comment.User_id,
+		"created_at": Comment.Created_at,
 	})
 }
 

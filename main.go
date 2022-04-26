@@ -12,7 +12,8 @@ func main() {
 	userRepo := controllers.UserRepo{DB: db}
 	photoRepo := controllers.PhotoRepo{DB: db}
 	commentRepo := controllers.CommentRepo{DB: db}
+	mediaRepo := controllers.MediaRepo{DB: db}
 
-	r := routers.StartApp(userRepo, photoRepo, commentRepo)
+	r := routers.StartApp(userRepo, photoRepo, commentRepo, mediaRepo)
 	r.Run(":8080")
 }
