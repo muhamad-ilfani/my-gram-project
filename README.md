@@ -9,7 +9,7 @@ This project use Go-language with Gin Framework. Database use postgresql. Login 
 ## Running APP
 Download repository
 
-https://github.com/muhamad-ilfani/my-gram-project.git
+git clone https://github.com/muhamad-ilfani/my-gram-project.git
 
 Run application with command
 
