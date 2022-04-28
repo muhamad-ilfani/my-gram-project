@@ -13,7 +13,7 @@ git clone https://github.com/muhamad-ilfani/my-gram-project.git
 
 Run application with command
 
-go run main.go
+docker-compose up --build
 #
 ## API Lists
 

@@ -2,13 +2,14 @@ package helpers
 
 import (
 	"errors"
+	"os"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
-const SecretKey = "verysecret"
+//const SecretKey = "verysecret"
 
 func GenerateToken(id uint, email string) string {
 	claims := jwt.MapClaims{}
@@ -16,7 +17,7 @@ func GenerateToken(id uint, email string) string {
 	claims["email"] = email
 
 	parseToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, _ := parseToken.SignedString([]byte(SecretKey))
+	signedToken, _ := parseToken.SignedString([]byte(os.Getenv("API_SECRET")))
 	return signedToken
 }
 
@@ -33,7 +34,7 @@ func VerifyToken(c *gin.Context) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errResponse
 		}
-		return []byte(SecretKey), nil
+		return []byte(os.Getenv("API_SECRET")), nil
 	})
 	if _, ok := token.Claims.(jwt.MapClaims); !ok && !token.Valid {
 		return nil, errResponse
